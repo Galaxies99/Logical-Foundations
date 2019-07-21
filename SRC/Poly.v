@@ -562,5 +562,4 @@ Example exp_3 : exp three two = plus (mult two (mult two two)) one.
 Proof. reflexivity. Qed.
 
 End Church.
-
-
+End Exercises.
