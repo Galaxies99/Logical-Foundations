@@ -495,11 +495,19 @@ Proof. reflexivity. Qed.
 Example test_bin_inc3: incr (B (B (B Z))) = (A (A (A (B Z)))).
 Proof. reflexivity. Qed.
 
-Fixpoint bin_to_nat (m: bin) : nat :=
+Fixpoint bin_to_nat' (m: bin) : nat :=
   match m with
   | Z => O
-  | A m => plus (bin_to_nat m) (bin_to_nat m)
-  | B m => plus (plus (bin_to_nat m) (bin_to_nat m)) (S O)
+  | A m => plus (bin_to_nat' m) (bin_to_nat' m)
+  | B m => plus (plus (bin_to_nat' m) (bin_to_nat' m)) (S O)
+  end.
+(* Original Form: too stupid. *)
+
+Fixpoint bin_to_nat (m: bin) : nat :=
+  match m with
+  | Z => 0
+  | A m => 2 * (bin_to_nat m)
+  | B m => 1 + 2 * (bin_to_nat m)
   end.
 
 Example test_bin_to_nat1: bin_to_nat (A (A (A (B Z)))) = 8.
