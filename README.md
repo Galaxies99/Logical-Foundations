@@ -1,2 +1,2 @@
-# Software-Foundations-Volume-1
-a Study Record of &lt;Software Foundations> (Benjamin C. Pierce) Volume 1
+# Software Foundations: Logical Foundations
+a Study Record of &lt;Software Foundations> (Benjamin C. Pierce et al.) Volume 1 (Logical Foundations)
