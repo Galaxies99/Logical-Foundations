@@ -4,10 +4,10 @@ Tony Fang (Galaxies) 's Study Record
 |  ID  |    Chapter    |              Solution               |
 | :--: | :-----------: | :---------------------------------: |
 |  1   |    Basics     |              Finished               |
-|  2   |   Induction   | Finished (including extra exercise) |
+|  2   |   Induction   |              Finished               |
 |  3   |     Lists     |              Finished               |
 |  4   |     Poly      |              Finished               |
-|  5   |    Tactics    |   Finished (except split_combine)   |
+|  5   |    Tactics    |              Finished               |
 |  6   |     Logic     | Finished (except the last exercise) |
 |  7   |    IndProp    |             Unfinished              |
 |  8   |     Maps      |             Unfinished              |
