@@ -1,2 +1,24 @@
-# Software Foundations: Logical Foundations
-a Study Record of &lt;Software Foundations> (Benjamin C. Pierce et al.) Volume 1 (Logical Foundations)
+# Logical Foundations
+Tony Fang (Galaxies) 's Study Record
+
+|  ID  |    Chapter    |              Solution              |
+| :--: | :-----------: | :--------------------------------: |
+|  1   |    Basics     |              Finished              |
+|  2   |   Induction   | Finished (included extra exercise) |
+|  3   |     Lists     |              Finished              |
+|  4   |     Poly      |              Finished              |
+|  5   |    Tactics    |  Finished (except split_combine)   |
+|  6   |     Logic     |  Finished (except tr_rev_correct)  |
+|  7   |    IndProp    |             Unfinished             |
+|  8   |     Maps      |             Unfinished             |
+|  9   | ProofObjects  |             Unfinished             |
+|  10  | IndPrinciples |             Unfinished             |
+|  11  |      Rel      |             Unfinished             |
+|  12  |      Imp      |             Unfinished             |
+|  13  |   ImpParser   |             Unfinished             |
+|  14  |  ImpCEvalFun  |             Unfinished             |
+|  15  |  Extraction   |             Unfinished             |
+|  16  |     Auto      |             Unfinished             |
+
+
+

@@ -379,7 +379,6 @@ Proof.
       reflexivity.
       reflexivity.
 Qed.
-(* Question: Fail to complete *)
 
 Definition sillyfun1 (n: nat) : bool :=
   if n =? 3 then true
