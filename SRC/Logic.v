@@ -439,7 +439,7 @@ Lemma In_map_iff:
   forall (A B: Type) (f: A -> B) (l: list A) (y: B), In y (map f l)
   <-> exists x, f x = y /\ In x l.
 Proof.
-  intros A B f l y.
+  intros A B f l y. 
   split.
   - intros H. 
     induction l.
@@ -634,7 +634,6 @@ Proof.
   destruct (proj1 _ _ (In_map_iff _ _ _ _ _) H) as [m [Hm _]].
   rewrite mult_0_r in Hm. rewrite Hm. reflexivity.
 Qed.
-(* Question: how? *)
 
 (* Chap 6.4 Coq vs. Set Theory *)
 (* Chap 6.4.1 Functional Extensionality *)
@@ -669,7 +668,6 @@ Fixpoint rev_append {X} (l1 l2: list X) : list X :=
 
 Definition tr_rev {X} (l: list X) : list X := rev_append l [].
 
-
 Lemma tr_rev_correct: forall X, @tr_rev X = @rev X.
 Proof.
   intros X.
@@ -677,8 +675,7 @@ Proof.
   intros l.
   induction l.
   - reflexivity.
-  - simpl. unfold tr_rev. unfold tr_rev in IHl.
-    simpl. Admitted.
+  - unfold tr_rev. simpl. Admitted.
 (* Question: how? *)
 
 (* Chap 6.4.2 Propositions and Booleans *)
@@ -813,8 +810,8 @@ Proof.
     + intros H''. rewrite H'' in H'. rewrite <- eqb_refl in H'. discriminate H'.
   - intros H. unfold not in H.
     destruct (x =? y) eqn: H'.
-    + rewrite eqb_eq in H'.  
-      destruct H. apply H'.    (* Question: What does destruct do? *)
+    + rewrite eqb_eq in H'.
+      destruct H. apply H'.
     + reflexivity.
 Qed.
 
