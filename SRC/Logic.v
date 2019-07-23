@@ -668,15 +668,28 @@ Fixpoint rev_append {X} (l1 l2: list X) : list X :=
 
 Definition tr_rev {X} (l: list X) : list X := rev_append l [].
 
+Lemma tr_rev_correct_lemma: 
+  forall X (l1 l2: list X), rev_append l1 l2 = rev l1 ++ l2.
+Proof.
+  intros X l1.
+  induction l1.
+  - intros l2.
+    simpl. reflexivity.
+  - intros l2.
+    simpl. rewrite <- app_assoc.
+    simpl. apply IHl1.
+Qed.
+
 Lemma tr_rev_correct: forall X, @tr_rev X = @rev X.
 Proof.
   intros X.
   apply functional_extensionality.
+  unfold tr_rev.  
   intros l.
-  induction l.
+  destruct l.
   - reflexivity.
-  - unfold tr_rev. simpl. Admitted.
-(* Question: how? *)
+  - simpl. apply tr_rev_correct_lemma. 
+Qed.
 
 (* Chap 6.4.2 Propositions and Booleans *)
 Example even_42_bool: evenb 42 = true.
