@@ -8,7 +8,7 @@ Tony Fang (Galaxies) 's Study Record
 |  3   |     Lists     |              Finished               |
 |  4   |     Poly      |              Finished               |
 |  5   |    Tactics    |   Finished (except split_combine)   |
-|  6   |     Logic     |  Finished (except tr_rev_correct)   |
+|  6   |     Logic     | Finished (except the last exercise) |
 |  7   |    IndProp    |             Unfinished              |
 |  8   |     Maps      |             Unfinished              |
 |  9   | ProofObjects  |             Unfinished              |
