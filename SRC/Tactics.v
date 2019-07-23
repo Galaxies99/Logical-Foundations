@@ -33,7 +33,7 @@ Proof.
   apply eq2. apply eq1. 
 Qed.
 
-(* Exercise silly_ex *)
+(* Exercise silly_ex *) 
 Theorem silly_ex: (forall n, evenb n = true -> oddb (S n) = true) -> evenb 3 = true -> oddb 4 = true.
 Proof.
   intros eq1 eq2.
@@ -451,7 +451,7 @@ Theorem eqb_sym: forall (n m: nat),
   (n =? m) = (m =? n).
 Proof.
   intros n m.
-  destruct (n =? m) eqn: Heq.
+  destruct (n =? m) eqn: Heq. 
   - apply eqb_true in Heq. 
     rewrite -> Heq. 
     apply eqb_refl.
@@ -483,10 +483,41 @@ Proof.
 Qed.
 
 (* Exercise split_combine *)
+Lemma length_zero_eq_empty: forall X (l: list X),
+  length l = 0 <-> l = [].
+Proof.
+  intros X l.
+  split.
+  - intros H.
+    induction l.
+    + reflexivity.
+    + simpl in H. discriminate H.
+  - intros H. rewrite H. reflexivity.
+Qed.
+
 Theorem split_combine: forall (X Y: Type) l1 l2 (l: list (X * Y)), 
   length l1 = length l2 -> combine l1 l2 = l -> split l = (l1, l2).
-Proof. Admitted.
-(* Question *)
+Proof.
+  intros X Y l1.
+  induction l1.
+  - intros l2 l H1 H2.
+    simpl in H1, H2. 
+    symmetry in H1. 
+    apply length_zero_eq_empty in H1.
+    rewrite H1, <- H2.
+    reflexivity.
+  - intros l2 l H1 H2.
+    destruct l2. 
+    + simpl in H1. discriminate H1.
+    + injection H1 as H1.
+      destruct l.
+      * simpl in H2. discriminate H2.
+      * simpl in H2. injection H2 as H2 H3.
+        simpl. rewrite <- H2.
+        replace (split l) with (l1, l2).
+        simpl. reflexivity.
+        symmetry. apply IHl1. apply H1. apply H3.
+Qed.
 
 (* Exercise filter_exercise *)
 Theorem filter_exercise: forall (X: Type) (test: X -> bool) (x: X) (l lf: list X),
