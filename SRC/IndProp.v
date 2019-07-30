@@ -447,7 +447,7 @@ Qed.
 Theorem subseq_trans: forall X (l1 l2 l3: list X), subseq l1 l2 -> subseq l2 l3 -> subseq l1 l3.
 Proof.
   intros.
-  generalize dependent l1.
+  generalize dependent l1. 
   induction H0.
   - intros. apply subset_empty_is_empty in H.
     rewrite H. apply empty.
@@ -565,7 +565,23 @@ Qed.
 (* Exercise reg_exp_of_list_spec *)
 Lemma reg_exp_of_list_spec: forall T (s1 s2: list T),
   s1 =~ reg_exp_of_list s2 <-> s1 = s2.
-Proof. Admitted.
+Proof. 
+  split.
+  - generalize dependent s1.
+    induction s2.
+    + intros. simpl in H. inversion H. reflexivity.
+    + intros. simpl in H. inversion H. apply IHs2 in H4. 
+      inversion H3. rewrite H4. simpl. reflexivity.
+  - generalize dependent s2.
+    induction s1.
+    + intros. rewrite <- H. simpl. apply MEmpty.
+    + intros. rewrite <- H. simpl.
+      replace (x :: s1) with ([x] ++ s1).
+      apply MApp.
+      * apply MChar. 
+      * apply IHs1. reflexivity.
+      * simpl. reflexivity.
+Qed.
 
 Fixpoint re_chars {T} (re: reg_exp): list T :=
   match re with
@@ -736,17 +752,86 @@ Proof.
   intros T re s Hmatch.
   induction Hmatch
     as [ | x | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
-       | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+       | s1 re1 re2 Hmatch IH | s2 re1 re2 Hmatch IH
        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2 ].
-  - simpl. omega.
-  - simpl. omega.
-  - simpl. rewrite app_length.
-    intros Hlen. admit.
-  - simpl. admit.
-  - simpl. admit.
-  - simpl. admit.
-  - simpl. admit.
-Admitted.
+  - (* MEmpty *)
+    simpl. omega.
+  - (* MChar *)
+    simpl. omega.
+  - (* MApp *)
+    simpl. intros. 
+    rewrite app_length in H.
+    apply Nat.add_le_cases in H.
+    destruct H as [H | H].
+    + apply IH1 in H. destruct H as [s3 [s4 [s5 [H1 [H2 H3]]]]].
+      exists s3, s4, (s5 ++ s2). rewrite H1. 
+      rewrite <- app_assoc. rewrite <- app_assoc. split.
+      * reflexivity.
+      * split.
+        { apply H2. }
+        { intros. rewrite -> app_assoc. rewrite -> app_assoc. 
+          rewrite <- app_assoc with (m := (napp m s4)).
+          apply MApp. apply H3. apply Hmatch2. }
+    + apply IH2 in H. destruct H as [s3 [s4 [s5 [H1 [H2 H3]]]]].
+      exists (s1 ++ s3), s4, s5. rewrite H1.
+      rewrite <- app_assoc. split.
+      * reflexivity.
+      * split.
+        { apply H2. }
+        { intros. rewrite <- app_assoc.
+          apply MApp. apply Hmatch1.
+          apply H3. }
+  - (* MUnionL *)
+    simpl. intros.
+    apply le_trans with (n := pumping_constant re1) in H.
+    + apply IH in H. destruct H as [s2 [s3 [s4 [H1 [H2 H3]]]]].
+      exists s2, s3, s4. rewrite H1. split.
+      * reflexivity.
+      * split.
+        { apply H2. }
+        { intros. apply MUnionL. apply H3. }
+    + apply le_plus_l.
+  - (* MUnionR *)
+    simpl. intros. 
+    rewrite plus_comm in H.
+    apply le_trans with (n := pumping_constant re2) in H.
+    apply IH in H. destruct H as [s1 [s3 [s4 [H1 [H2 H3]]]]].
+    + exists s1, s3, s4. rewrite H1. split.
+      * reflexivity.
+      * split.
+        { apply H2. }
+        { intros. apply MUnionR. apply H3. }
+    + apply le_plus_l.
+  - (* MStar0 *)
+    simpl. intros. inversion H.
+  - (* MStarApp *)
+    simpl. intros. rewrite app_length in H.
+    destruct s1.
+    + destruct s2.
+      * inversion H.
+      * simpl in H. simpl in IH2. apply IH2 in H.
+        destruct H as [s1 [s3 [s4 [H1 [H2 H3]]]]].
+        rewrite H1. simpl. exists s1, s3, s4. split.
+        { reflexivity. }
+        { split.
+          - apply H2.
+          - apply H3. }
+    + exists [], (x :: s1), s2. split.
+      * reflexivity. 
+      * split.
+        { intro. discriminate. }
+        { intro. simpl. apply star_app.
+          - induction m.
+            + simpl. apply MStar0.
+            + remember (x :: s1) as s1'.
+              simpl. apply star_app.
+              rewrite <- app_nil_r with (l := s1').
+              apply MStarApp.
+              apply Hmatch1.
+              apply MStar0.
+              apply IHm.
+          - apply Hmatch2. }
+Qed.
 
 End Pumping.
 
@@ -838,12 +923,15 @@ Qed.
 
 (* Chap 7.6 Additional Exercises *)
 (* Exercise nostutter_defn *)
+Definition check_is_not_head {X: Type} (l: list X) (x: X) : Prop :=
+  match l with
+  | [] => True
+  | h :: t => x <> h
+  end.
 
-(* Unfinished *)
-(*
 Inductive nostutter {X: Type} : list X -> Prop :=
-  | nil: nostutter []
-  | add x l (H: (~ (In x l)) \/ (In x l /\ )) (I: nostutter l): nostutter (x :: y :: l).
+  | nostutter_nil: nostutter []
+  | nostutter_add x l (H: check_is_not_head l x) (I: nostutter l): nostutter (x :: l).
 
 Example test_nostutter_1: nostutter [3;1;4;1;5;6].
 Proof.
@@ -864,11 +952,11 @@ Example test_nostutter_4: not (nostutter [3;1;1;4]).
 Proof.
   intro.
   repeat match goal with
-    h: nostutter _ ⊢ _ => inversion h; clear h; subst
+    h: nostutter _ |- _ => inversion h; clear h; subst
   end.
-  contradiction Hneq0; auto. 
+  contradiction H0; auto. 
 Qed.
-*)
+
 
 (* Exercise filter_challenge *)
 Inductive merge_in_order {X: Type}: list X -> list X -> list X -> Prop :=
@@ -1037,15 +1125,35 @@ Proof.
       destruct I as [l1 [l3 I]].
       apply IHl1' with (l2 := l1 ++ l3).
       * apply H.
-      * intros. simpl in H0.
-        admit.
+      * intros.
+        rewrite I in H0.
+        assert (H': x <> x0). 
+        { intros contra. rewrite <- contra in H2. apply Hex in H2. apply H2. }
+        Check In_app_iff.
+        assert (H3: In x0 l1' <-> In x0 (x :: l1')).
+        { split.
+          - intros. simpl. right. apply H3. 
+          - intros. destruct H3.
+            + apply H' in H3. inversion H3.
+            + apply H3. }
+        rewrite H3 in H2.
+        apply H0 in H2.
+        apply In_app_iff in H2.
+        apply In_app_iff.
+        destruct H2.
+        { left. apply H2. }
+        { right. simpl in H2.
+          destruct H2.
+          - apply H' in H2. inversion H2.
+          - apply H2.
+        }
       * rewrite I in H1. 
         rewrite app_length, plus_comm in H1.
         simpl in H1. unfold lt in *.
         apply le_pred in H1. simpl in H1.
         rewrite app_length, plus_comm.
         apply H1.
-Admitted.
+Qed.
 
 (* Extended Exercise: A Verified Regular-Expression Matcher *)
 Require Export Coq.Strings.Ascii.
