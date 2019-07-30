@@ -1034,15 +1034,225 @@ Proof.
 Qed.
 
 (* Exercise palindrome_converse *)
+(* 
+   First we prove that:
+   If the Prop has the following property:
+     If a Prop is true for all the numbers less than n, then it's true for n.
+   Then we can conclude the Prop is true for all natural numbers n.
+*)
+Lemma Prop_induction_for_nat: forall (P: nat -> Prop),
+  (forall n, (forall m, m < n -> P m) -> P n) ->
+  (forall n, P n).
+Proof.
+  intros. 
+  apply H.
+  induction n.
+  - intros. inversion H0.
+  - apply H in IHn as Hn.
+    intros.
+    inversion H0.
+    + apply Hn.
+    + apply IHn. unfold lt. apply H2.
+Qed.
+
+(* 
+   Then we prove a special nat induction way which is:
+   The Prop is true for 0 and 1, and if the Prop is true for n, then it's true for (n + 2).
+   From this we can conclude that the Prop is true for all n.
+   We cannot use simple induction here because even and odd should be split, so we use the
+   Prop_induction_for_nat we state before.
+*)
+Lemma nat_induction: forall (P: nat -> Prop),
+  P 0 -> P 1 -> (forall n, P n -> P (n + 2)) ->
+  (forall n, P n).
+Proof.
+  intros.
+  apply Prop_induction_for_nat.
+  intros m H2.
+  destruct m.
+  - apply H.
+  - destruct m.
+    + apply H0.
+    + assert (I: S (S m) = m + 2). { rewrite -> plus_comm. reflexivity. }
+      rewrite I. apply H1.
+      apply H2. unfold lt.
+      apply le_S. apply le_n.
+Qed.
+
+(*
+   Next, we think about Prop connected to the list.
+   Because we want to prove palindromes_converse Theorem, so we need to reduce the length
+   twice a step. Then we need the following Lemma. It state if we can prove that forall n, 
+   lists that have length n satisfy Prop, we can prove all the lists satisfy the Prop.
+   This lemma is quite easy to prove though, by connecting n with (length l).
+*)
+Lemma length_induction: forall X (P: list X -> Prop),
+  (forall n l, length l = n -> P l) ->
+  forall l, P l.
+Proof.
+  intros.
+  apply H with (n := length l).
+  reflexivity.
+Qed.
+
+(*
+   This is Lemma state that "list l is empty" equals to "list (rev l) is empty"
+*)
+Lemma rev_empty_eq_empty: forall X (l: list X), rev l = [] <-> l = [].
+Proof.
+  split.
+  - intros. 
+    destruct l eqn: Hl.
+    + reflexivity.
+    + rewrite <- rev_involutive with (l := (x :: l0)).
+      rewrite H. reflexivity.
+  - intros. rewrite H. reflexivity.
+Qed.
+
+(*
+   This is a Lemma shows that if a list has length (n + 2), we can get its head and tail
+   off the list, then its length becomes n.
+*)
+Lemma list_length_SS: forall X (l: list X) n,
+  (length l = n + 2) -> exists l' x y, l = [x] ++ l' ++ [y] /\ length l' = n.
+Proof.
+  intros.
+  destruct l.
+  - rewrite <- plus_comm in H. simpl in H. discriminate.
+  - rewrite <- plus_comm in H. simpl in H. injection H as H.
+    destruct (rev l) eqn: Hr.
+    + assert (Hempty: l = []).
+      { apply rev_empty_eq_empty, Hr. }
+      rewrite Hempty in H. simpl in H. discriminate.
+    + exists (rev l0), x, x0.
+      assert(I: l = rev l0 ++ [x0]).
+        { rewrite <- rev_involutive with (l := l).
+          rewrite Hr. simpl. reflexivity. }
+      split.
+      * rewrite I. simpl. reflexivity.
+      * rewrite -> I in H. 
+        rewrite app_length in H. 
+        simpl in H.
+        rewrite <- plus_n_Sm in H.
+        injection H as H.
+        rewrite <- plus_n_O in H.
+        apply H.
+Qed.
+
+(* 
+   This is a Lemma shows our induction about palindromes:
+   i) Empty list satisfies the Prop
+   ii) List which has only one element satisfies.
+   iii) If we have a satisfied list l, we can add an element to the list head and add
+   add an element to its tail, the new list still satisfies.
+   If a Prop satisfies all the point above, then it's true for all the list.
+
+   To prove this, we start with a induction on length using length_induction.
+   and we make Pn as our new Prop (nat (here is length) -> Prop).
+   i) try to prove Pn 0 is true.
+   ii) try to prove Pn 1 is true.
+   iii) try to prove if Pn n is true, then Pn (n + 2) is true.
+        In this step, we may use the Lemma list_length_SS above to get the head and tail
+        of the list and reduce the length by 2, so that we can use Pn n.
+   iv) if we prove the things above, then we can prove forall list it is true.
+       By introducing the length n of any list, and using nat_induction to prove Pn n is 
+       true).
+*)
+Lemma palindrome_induction: forall X (P: list X -> Prop),
+  P [] ->
+  (forall x: X, P [x]) ->
+  (forall (x y: X) (l: list X), P l -> P (x :: l ++ [y])) ->
+  (forall l, P l).
+Proof. 
+  intros.
+  apply length_induction.
+  remember (fun n => (forall l, length l = n -> P l)) as Pn.
+  assert (Pn0: Pn 0).
+  {
+    rewrite HeqPn. intros. destruct l0.
+    - apply H.
+    - simpl in H2. discriminate.
+  }
+  assert (Pn1: Pn 1).
+  {
+    rewrite HeqPn. intros.
+    destruct l0.
+    - apply H.
+    - destruct l0.
+      + apply H0.
+      + simpl in H2. discriminate.
+  }
+  assert (PnTrans: forall n, Pn n -> Pn (n + 2)).
+  {
+    rewrite HeqPn.
+    intros.
+    apply list_length_SS in H3 as H4.
+    destruct H4 as [l' [x [y [H4 H5]]]].
+    apply H2 in H5.
+    rewrite H4. apply H1, H5.
+  }
+  intros n.
+  assert (Pnn: Pn n).
+  { apply nat_induction. apply Pn0. apply Pn1. apply PnTrans. }
+  rewrite HeqPn in Pnn.
+  apply Pnn.
+Qed.
+
+Lemma equal_length_eq: forall X (l1 l2: list X),
+  l1 = l2 -> length l1 = length l2.
+Proof.
+  intros.
+  rewrite H.
+  reflexivity.
+Qed.
+
+Lemma app_one: forall X (l1 l2: list X) x y, l1 ++ [x] = l2 ++ [y] -> l1 = l2 /\ x = y.
+Proof.
+  intros.
+  generalize dependent l2.
+  induction l1.
+  - intros. destruct l2.
+    + split. reflexivity. inversion H. rewrite H1 in H. reflexivity.
+    + apply equal_length_eq in H. injection H as H.
+      rewrite app_length in H. simpl in H. rewrite plus_comm in H. discriminate.
+  - intros. destruct l2. 
+    + apply equal_length_eq in H. injection H as H.
+      rewrite app_length in H. simpl in H. rewrite plus_comm in H. discriminate.
+    + simpl. inversion H. rewrite H1 in *.
+      apply IHl1 in H2. destruct H2 as [H2 H3]. split.
+      * rewrite H2. reflexivity.
+      * apply H3.
+Qed.
+
+Lemma rev_back_eq_front: forall X (l: list X) x,
+  rev (l ++ [x]) = x :: rev l.
+Proof.
+  intros.
+  induction l.
+  - reflexivity.
+  - simpl. rewrite IHl. simpl. reflexivity.
+Qed.
+
+(*
+   We can use palindrome_induction to prove this theorem, with P := l => l = rev l -> pal l.
+   Length 0, and length 1 is easy to prove.
+   How about length n + 2? We can use the result of length n to prove that x = y.
+*)
 Theorem palindrome_converse: forall X (l: list X), l = rev l -> pal l.
 Proof.
   intros X l.
-  induction (rev l) eqn: H1.
-  - intros. rewrite H. apply Empty_P.
-  - destruct l.
-    + intros. discriminate H.
-    + intros. admit.
-Admitted.
+  apply palindrome_induction with (P := fun l => l = rev l -> pal l).
+  - intros. apply Empty_P.
+  - intros. apply One_P.
+  - intros. simpl in *.
+    replace (x :: l0 ++ [y]) with ((x :: l0) ++ [y]) in *.
+    apply app_one in H0.
+    destruct H0 as [H1 H2].
+    simpl. rewrite H2 in *. apply Add_P.
+    apply H. rewrite rev_back_eq_front in H1.
+    injection H1 as H1. apply H1.
+    simpl. reflexivity.
+Qed.
 
 (* Exercise NoDup *)
 Inductive NoDup {X: Type}: list X -> Prop :=
@@ -1129,7 +1339,6 @@ Proof.
         rewrite I in H0.
         assert (H': x <> x0). 
         { intros contra. rewrite <- contra in H2. apply Hex in H2. apply H2. }
-        Check In_app_iff.
         assert (H3: In x0 l1' <-> In x0 (x :: l1')).
         { split.
           - intros. simpl. right. apply H3. 
@@ -1268,25 +1477,28 @@ Lemma star_ne: forall (a: ascii) s re, a :: s =~ Star re <->
   exists s0 s1, s = s0 ++ s1 /\ a :: s0 =~ re /\ s1 =~ Star re.
 Proof.
   intros. split.
-  - intros. inversion H.
-    destruct s1.
-    + destruct s2.
-      * discriminate H1.
-      * admit.
-    + simpl. injection H1 as H4 H5. 
-      exists s1, s2. split. symmetry. apply H5.
-      split. rewrite <- H4. apply H2. apply H3.
   - intros. 
-    remember (Star re) as re'.
-    destruct H as [s0 [s1 [H1 [H2 H3]]]].
-    admit.
+    inversion H.
+    destruct s1.
+      + admit. 
+      + simpl in H1. injection H1 as H4 H5.
+        exists s1, s2. split.
+        * rewrite H5. reflexivity.
+        * split. { rewrite <- H4. apply H2. } { apply H3. }
+  - intros. destruct H as [s0 [s1 [H1 [H2 H3]]]].
+    rewrite H1. 
+    replace (a :: s0 ++ s1) with ((a :: s0) ++ s1).
+    apply MStarApp.
+    + apply H2.
+    + apply H3.
+    + reflexivity.
 Admitted.
 
 Definition refl_matches_eps m :=
   forall re : @reg_exp ascii, reflect ([ ] =~ re) (m re).
 
 (* Exercise match_eps *)
-Print reg_exp.
+Print reg_exp. 
 Fixpoint match_eps (re: @reg_exp ascii) : bool :=
   match re with
   | EmptySet => false
@@ -1317,7 +1529,9 @@ Proof.
   - intros. inversion H.
     + reflexivity.
     + simpl. apply app_nil_both_nil in H1. destruct H1 as [H4 H5].
-      apply andb_true_iff. split. admit. admit.
+      apply andb_true_iff. rewrite H4, H5 in *. split.
+      * admit.
+      * admit.
     + simpl. apply orb_true_iff. left. admit.
     + simpl. apply orb_true_iff. right. admit.
     + rewrite H1. admit.
@@ -1326,9 +1540,15 @@ Proof.
     + discriminate H.
     + apply MEmpty.
     + discriminate H.
-    + admit.
-    + admit.
-    + admit.
+    + simpl in H. apply andb_true_iff in H. destruct H as [H1 H2].
+      apply IHre1 in H1; apply IHre2 in H2.
+      assert(H: [] ++ [] =~ App re1 re2).
+      { apply MApp. apply H1. apply H2. }
+      simpl in H. apply H.
+    + simpl in H. apply orb_true_iff in H. destruct H as [H1 | H2].
+      * apply IHre1 in H1. apply MUnionL. apply H1.
+      * apply IHre2 in H2. apply MUnionR. apply H2.
+    + apply MStar0. 
 Admitted.
 
 Definition is_der re (a: ascii) re' :=
@@ -1338,16 +1558,58 @@ Definition derives d := forall a re, is_der re a (d a re).
 
 (* Exercise derive *)
 
+Fixpoint derive (a: ascii) (re: @reg_exp ascii): @reg_exp ascii. Admitted.
 
+Example c := ascii_of_nat 99.
+Example d := ascii_of_nat 100.
 
+Example test_der0 : match_eps (derive c (EmptySet)) = false.
+Proof.
+Admitted.
 
+Example test_der1 : match_eps (derive c (Char c)) = true.
+Proof.
+Admitted.
 
+Example test_der2 : match_eps (derive c (Char d)) = false.
+Proof.
+Admitted.
 
+Example test_der3 : match_eps (derive c (App (Char c) EmptyStr)) = true.
+Proof.
+Admitted.
 
+Example test_der4 : match_eps (derive c (App EmptyStr (Char c))) = true.
+Proof.
+Admitted.
 
+Example test_der5 : match_eps (derive c (Star (Char c))) = true.
+Proof.
+Admitted.
 
+Example test_der6 :
+  match_eps (derive d (derive c (App (Char c) (Char d)))) = true.
+Proof.
+Admitted.
 
+Example test_der7 :
+  match_eps (derive d (derive c (App (Char d) (Char c)))) = false.
+Proof.
+Admitted.
 
+(* Exercise derive_corr *)
+Lemma derive_corr : derives derive.
+Proof.
+Admitted.
 
+Definition matches_regex m: Prop :=
+  forall (s: string) re, reflect (s =~ re) (m s re).
 
+(* Exercise regex_match *)
+Fixpoint regex_match (s: string) (reg: @reg_exp ascii) : bool.
+Admitted.
 
+(* Exercise regex_refl *)
+Theorem regex_refl: matches_regex regex_match.
+Proof.
+Admitted.
