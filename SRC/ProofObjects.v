@@ -147,7 +147,8 @@ Definition some_nat_is_even: exists n, even n :=
   ex_intro even 4 (ev_SS 2 (ev_SS 0 ev_0)).
 
 (* Exercise ex_ev_Sn *)
-Definition ex_ev_Sn: ex (fun n => even (S n)). Admitted.
+Definition ex_ev_Sn: ex (fun n => even (S n)) :=
+  ex_intro (fun n => even (S n)) 1 (ev_SS 0 ev_0).
 
 (* Chap 9.4.4 True and False *)
 Inductive True : Prop :=
@@ -193,6 +194,12 @@ Lemma leibniz_equality__equality: forall (X: Type) (x y: X),
   (forall P: X -> Prop, P x -> P y) -> x == y.
 Proof.
   intros.
-Admitted.
+  assert(I: x = x -> x = y).
+  { apply H. }
+  replace y with x.
+  apply eq_refl.
+  apply I.
+  reflexivity.
+Qed.
 
 End MyEquality.

@@ -11,7 +11,7 @@ Tony Fang (Galaxies) 's Study Record
 |  6   |     Logic     |    Finished     |
 |  7   |    IndProp    | Almost Finished |
 |  8   |     Maps      |    Finished     |
-|  9   | ProofObjects  | Almost Finished |
+|  9   | ProofObjects  |    Finished     |
 |  10  | IndPrinciples |   Unfinished    |
 |  11  |      Rel      |   Unfinished    |
 |  12  |      Imp      |   Unfinished    |
