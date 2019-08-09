@@ -10,7 +10,7 @@ Tony Fang (Galaxies) 's Study Record
 |  5   |    Tactics    |    Finished     |
 |  6   |     Logic     |    Finished     |
 |  7   |    IndProp    | Almost Finished |
-|  8   |     Maps      |   Unfinished    |
+|  8   |     Maps      |    Finished     |
 |  9   | ProofObjects  |   Unfinished    |
 |  10  | IndPrinciples |   Unfinished    |
 |  11  |      Rel      |   Unfinished    |
