@@ -946,4 +946,57 @@ Definition de_morgan_not_and_not :=
 Definition implies_to_or :=
   forall P Q: Prop, (P -> Q) -> (~P \/ Q).
 
-(* unfinished. *)
+Lemma excluded_middle_to_peirce:
+  excluded_middle -> peirce.
+Proof. 
+  intro EM.
+  unfold peirce.
+  intros.
+  assert (IP: P \/ (~P)).
+  { apply EM. }
+  tauto.
+Qed.
+
+Lemma peirce_to_double_negation_elimination:
+  peirce -> double_negation_elimination.
+Proof.
+  intro PE.
+  unfold double_negation_elimination.
+  intros.
+  assert(I: ((P -> False) -> P) -> P).
+  { apply PE. }
+  tauto.
+Qed.
+
+Lemma double_negation_elimination_to_de_morgan_not_and_not:
+  double_negation_elimination -> de_morgan_not_and_not.
+Proof.
+  intro DNE.
+  unfold de_morgan_not_and_not.
+  intros.
+  assert(IPQ: ~~ (P \/ Q) -> (P \/ Q)). 
+  { apply DNE. }
+  tauto.
+Qed.
+
+Lemma de_morgan_not_and_not_to_implies_to_or:
+  de_morgan_not_and_not -> implies_to_or.
+Proof.
+  intro DMNAN.
+  unfold implies_to_or.
+  intros.
+  assert(I: ~(~~P /\ ~Q) -> (~P) \/ Q).
+  { apply DMNAN. }
+  tauto.
+Qed.
+
+Lemma implies_to_or_to_excluded_middle:
+  implies_to_or -> excluded_middle.
+Proof.
+  intros ITO.
+  unfold excluded_middle.
+  intros.
+  assert (I: (P -> P) -> (~P \/ P)). 
+  { apply ITO. }
+  tauto.
+Qed.
