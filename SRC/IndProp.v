@@ -202,7 +202,7 @@ Qed.
 
 Theorem ev_plus_plus: forall n m p,
   even (n+m) -> even (n+p) -> even (m+p).
-Proof.
+Proof. 
   intros.
   apply ev_ev__ev with (n := n + n).
   rewrite plus_assoc.
@@ -1477,14 +1477,27 @@ Lemma star_ne: forall (a: ascii) s re, a :: s =~ Star re <->
   exists s0 s1, s = s0 ++ s1 /\ a :: s0 =~ re /\ s1 =~ Star re.
 Proof.
   intros. split.
-  - intros. 
-    inversion H.
-    destruct s1.
-      + admit. 
-      + simpl in H1. injection H1 as H4 H5.
+  - intros.
+    remember (Star re) as re'.
+    remember (a :: s) as s'.
+    induction H.
+    + intros. inversion Heqs'.
+    + intros. inversion Heqre'.
+    + intros. inversion Heqre'.
+    + intros. inversion Heqre'.
+    + intros. inversion Heqre'.
+    + intros. inversion Heqs'.
+    + intros.
+      destruct s1.
+      * simpl in Heqs'.
+        apply IHexp_match2 in Heqre'. apply Heqre'. apply Heqs'.
+      * simpl in Heqs'.
+        injection Heqs' as H1 H2.
         exists s1, s2. split.
-        * rewrite H5. reflexivity.
-        * split. { rewrite <- H4. apply H2. } { apply H3. }
+        { rewrite H2. reflexivity. }
+        { split. rewrite <- H1. injection Heqre' as Hre. rewrite <- Hre. apply H.
+                 apply H0.
+        }
   - intros. destruct H as [s0 [s1 [H1 [H2 H3]]]].
     rewrite H1. 
     replace (a :: s0 ++ s1) with ((a :: s0) ++ s1).
@@ -1492,7 +1505,7 @@ Proof.
     + apply H2.
     + apply H3.
     + reflexivity.
-Admitted.
+Qed.
 
 Definition refl_matches_eps m :=
   forall re : @reg_exp ascii, reflect ([ ] =~ re) (m re).
@@ -1506,7 +1519,7 @@ Fixpoint match_eps (re: @reg_exp ascii) : bool :=
   | Char t => false
   | App re0 re1 => (match_eps re0) && (match_eps re1)
   | Union re0 re1 => (match_eps re0) || (match_eps re1)
-  | Star re => (match_eps re)
+  | Star re => true
   end.
 
 Lemma app_nil_both_nil: forall X (l1 l2: list X),
@@ -1526,16 +1539,24 @@ Proof.
   intros.
   apply iff_reflect.
   split.
-  - intros. inversion H.
+  - intros. 
+    induction re.
+    + inversion H.
     + reflexivity.
-    + simpl. apply app_nil_both_nil in H1. destruct H1 as [H4 H5].
-      apply andb_true_iff. rewrite H4, H5 in *. split.
-      * admit.
-      * admit.
-    + simpl. apply orb_true_iff. left. admit.
-    + simpl. apply orb_true_iff. right. admit.
-    + rewrite H1. admit.
-    + rewrite H3. admit.
+    + inversion H.
+    + inversion H.
+      destruct s1 eqn: Hs1.
+      * simpl in *. rewrite H1 in H4.
+        apply andb_true_iff.
+        split. apply IHre1, H3. apply IHre2, H4.
+      * simpl in *.
+        discriminate.
+    + inversion H. 
+      * simpl in *.
+        apply orb_true_iff. left. apply IHre1, H2.
+      * simpl in *.
+        apply orb_true_iff. right. apply IHre2, H1.
+    + reflexivity.
   - intros. induction re.
     + discriminate H.
     + apply MEmpty.
@@ -1548,8 +1569,8 @@ Proof.
     + simpl in H. apply orb_true_iff in H. destruct H as [H1 | H2].
       * apply IHre1 in H1. apply MUnionL. apply H1.
       * apply IHre2 in H2. apply MUnionR. apply H2.
-    + apply MStar0. 
-Admitted.
+    + apply MStar0.
+Qed.
 
 Definition is_der re (a: ascii) re' :=
   forall s, a :: s =~ re <-> s =~ re'.
@@ -1557,19 +1578,24 @@ Definition is_der re (a: ascii) re' :=
 Definition derives d := forall a re, is_der re a (d a re).
 
 (* Exercise derive *)
-
-Fixpoint derive (a: ascii) (re: @reg_exp ascii): @reg_exp ascii. Admitted.
+Fixpoint derive (a: ascii) (re: @reg_exp ascii): @reg_exp ascii :=
+  match re with
+  | EmptySet => EmptySet
+  | EmptyStr => EmptyStr
+  | Char t => match 
+  | App re1 re2 => App (derive a re1) (derive a re2) 
+  | Union re1 re2 => Union (derive a re1) (derive a re2)
+  | Star re => Star (derive a re)
+  end.
 
 Example c := ascii_of_nat 99.
 Example d := ascii_of_nat 100.
 
 Example test_der0 : match_eps (derive c (EmptySet)) = false.
-Proof.
-Admitted.
+Proof. reflexivity. Qed.
 
 Example test_der1 : match_eps (derive c (Char c)) = true.
-Proof.
-Admitted.
+Proof. Admitted.
 
 Example test_der2 : match_eps (derive c (Char d)) = false.
 Proof.
@@ -1613,3 +1639,4 @@ Admitted.
 Theorem regex_refl: matches_regex regex_match.
 Proof.
 Admitted.
+*)
