@@ -1259,6 +1259,9 @@ Inductive NoDup {X: Type}: list X -> Prop :=
   | Empty_ND: NoDup []
   | Add_ND: forall x l, NoDup l -> ~ (In x l) -> NoDup (x :: l).
 
+Definition disjoint {X: Type} (l1 l2: list X) :=
+  forall x, In x l1 -> ~ (In x l2).
+
 Example NoDupTest1: NoDup [1;2;3;4].
 Proof.
   apply Add_ND. apply Add_ND. apply Add_ND. apply Add_ND. apply Empty_ND.
@@ -1279,7 +1282,7 @@ Qed.
 
 Theorem NoDup_app: forall X (l1 l2: list X),
   NoDup l1 -> NoDup l2 ->
-  (forall x, In x l1 -> ~ (In x l2)) ->
+  disjoint l1 l2 ->
   NoDup (l1 ++ l2).
 Proof.
   intros X l1 l2.
@@ -1288,7 +1291,7 @@ Proof.
   - intros. simpl. apply H.
   - intros. simpl. apply Add_ND. apply IHNoDup.
     + apply H0.
-    + intros. apply H2. simpl. right. apply H3.
+    + unfold disjoint in *. intros. apply H2. simpl. right. apply H3.
     + unfold not. intros. apply In_app_iff in H3.
       destruct H3 as [H3 | H3].
       * apply H in H3. apply H3.
@@ -1534,7 +1537,7 @@ Proof.
 Qed.
 
 Lemma match_eps_refl: refl_matches_eps match_eps.
-Proof. 
+Proof.
   unfold refl_matches_eps.
   intros.
   apply iff_reflect.
@@ -1582,11 +1585,16 @@ Fixpoint derive (a: ascii) (re: @reg_exp ascii): @reg_exp ascii :=
   match re with
   | EmptySet => EmptySet
   | EmptyStr => EmptyStr
-  | Char t => match 
-  | App re1 re2 => App (derive a re1) (derive a re2) 
+  | Char t => 
+      if (nat_of_ascii a) =? (nat_of_ascii t) then EmptyStr 
+      else re
+  | App re1 re2 => 
+      if (match_eps re1) then Union (derive a re2) (App (derive a re1) re2)
+      else App (derive a re1) re2
   | Union re1 re2 => Union (derive a re1) (derive a re2)
   | Star re => Star (derive a re)
   end.
+(* Not sure about it *)
 
 Example c := ascii_of_nat 99.
 Example d := ascii_of_nat 100.
@@ -1595,37 +1603,40 @@ Example test_der0 : match_eps (derive c (EmptySet)) = false.
 Proof. reflexivity. Qed.
 
 Example test_der1 : match_eps (derive c (Char c)) = true.
-Proof. Admitted.
+Proof. reflexivity. Qed.
 
 Example test_der2 : match_eps (derive c (Char d)) = false.
-Proof.
-Admitted.
+Proof. reflexivity. Qed.
 
 Example test_der3 : match_eps (derive c (App (Char c) EmptyStr)) = true.
-Proof.
-Admitted.
+Proof. reflexivity. Qed.
 
 Example test_der4 : match_eps (derive c (App EmptyStr (Char c))) = true.
-Proof.
-Admitted.
+Proof. reflexivity. Qed.
 
 Example test_der5 : match_eps (derive c (Star (Char c))) = true.
-Proof.
-Admitted.
+Proof. reflexivity. Qed.
 
 Example test_der6 :
   match_eps (derive d (derive c (App (Char c) (Char d)))) = true.
-Proof.
-Admitted.
+Proof. reflexivity. Qed.
 
 Example test_der7 :
   match_eps (derive d (derive c (App (Char d) (Char c)))) = false.
-Proof.
-Admitted.
+Proof. reflexivity. Qed.
 
 (* Exercise derive_corr *)
 Lemma derive_corr : derives derive.
 Proof.
+  unfold derives.
+  unfold is_der.
+  split.
+  - induction re.
+    + intros. inversion H.
+    + intros. inversion H.
+    + intros. inversion H.
+      simpl. rewrite <- Induction.eqb_refl. apply MEmpty.
+    + intros. simpl.
 Admitted.
 
 Definition matches_regex m: Prop :=
@@ -1639,4 +1650,4 @@ Admitted.
 Theorem regex_refl: matches_regex regex_match.
 Proof.
 Admitted.
-*)
+
