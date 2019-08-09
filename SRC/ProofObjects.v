@@ -195,3 +195,4 @@ Proof.
   intros.
 Admitted.
 
+End MyEquality.
