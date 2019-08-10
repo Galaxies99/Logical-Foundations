@@ -256,7 +256,7 @@ Inductive aevalR: aexp -> nat -> Prop :=
       aevalR (AMult e1 e2) (n1 * n2).
 End TooHardToRead.
 
-Notation "e ‘\\' n" := (aevalR e n)
+Notation "e 鈥榎\' n" := (aevalR e n)
   (at level 50, left associativity) : type_scope.
 
 End aevalR_first_try.
@@ -885,12 +885,12 @@ Inductive ceval: com -> state -> result -> state -> Prop :=
   | E_Skip: forall st, st =[ CSkip ]=> st / SContinue
   | E_Break: forall st, st =[ CBreak ]=> st / SBreak
   | E_Ass: forall a1 n x st, aeval st a1 = n -> st =[ x ::= a1 ]=> (x !-> n; st) / SContinue
-  | E_Seq_Break: forall c1 c2 st st', st =[ c1 ]=> st' / SBreak -> st' =[ c1;; c2 ]=> st' / SBreak
-  | E_Seq_Continue: forall c1 c2 st st' st'' res, st =[ c1 ]=> st' / SContinue -> st' =[ c2 ]=> st'' / res -> st =[ c1;; c2 ]=> st'' / res
+  | E_SeqBreak: forall c1 c2 st st', st =[ c1 ]=> st' / SBreak -> st =[ c1;; c2 ]=> st' / SBreak
+  | E_SeqContinue: forall c1 c2 st st' st'' res, st =[ c1 ]=> st' / SContinue -> st =[ c2 ]=> st'' / res -> st =[ c1;; c2 ]=> st'' / res
   | E_IfTrue: forall b c1 c2 st st' res, beval st b = true -> st =[ c1 ]=> st' / res -> st =[ TEST b THEN c1 ELSE c2 FI ]=> st' / res
   | E_IfFalse: forall b c1 c2 st st' res, beval st b = false -> st =[ c2 ]=> st' / res -> st =[ TEST b THEN c1 ELSE c2 FI ]=> st' / res
   | E_WhileFalse: forall b c st, beval st b = false -> st =[ WHILE b DO c END ]=> st / SContinue
-  | E_WhileTrue: forall b c st st' st'' res, beval st b = true -> st =[ c ]=> st' / SContinue -> st' =[ WHILE b DO c END ]=> st'' / res -> st =[ WHILE b DO c END]=> st'' / SContinue
+  | E_WhileTrue: forall b c st st' st'', beval st b = true -> st =[ c ]=> st' / SContinue -> st' =[ WHILE b DO c END ]=> st'' / SContinue -> st =[ WHILE b DO c END]=> st'' / SContinue
   | E_WhileBreak: forall b c st st', beval st b = true -> st =[ c ]=> st' / SBreak -> st =[ WHILE b DO c END ]=> st' / SContinue
 where "st '=[' c ']=>' st' '/' s" := (ceval c st s st').
 
@@ -899,7 +899,7 @@ Theorem break_ignore: forall c st st' s,
 Proof.
   intros.
   inversion H.
-  subst. reflexivity.
+  subst. inversion H5. reflexivity.
   subst. inversion H2.
 Qed.
 
@@ -941,24 +941,106 @@ Theorem ceval_deterministic: forall (c: com) st st1 st2 s1 s2,
   st =[ c ]=> st2 / s2 ->
   st1 = st2 /\ s1 = s2.
 Proof.
-  intros c st st1 st2 s1 s2 H1 H2.
+  intros.
   generalize dependent st2.
   generalize dependent s2.
-  induction H1; 
-  intros s2 st2 H2;
-  subst.
-  - (* E_Skip *) inversion H2. split. reflexivity. reflexivity.
-  - (* E_Break *) inversion H2. split. reflexivity. reflexivity.
-  - (* E_Ass *) inversion H2. subst. split. reflexivity. reflexivity.
-  - (* E_SeqBreak *) inversion H2.
-    + (* the other is E_SeqBreak *) subst. split. reflexivity. reflexivity.
-    + (* the other is E_SeqContinue *) subst.
-
-Admitted.
+  induction H; intros.
+  - (* E_Skip *) inversion H0. auto.
+  - (* E_Break *) inversion H0. auto.
+  - (* E_Ass *) inversion H0. subst. auto.
+  - (* E_SeqBreak *) inversion H0; subst. 
+    + (* other E_SeqBreak *) auto.
+    + (* other E_SeqContinue *)
+      assert (st' = st'0 /\ SBreak = SContinue).
+      { apply IHceval. apply H3. }
+      inversion H1. discriminate.
+  - (* E_SeqContinue *) inversion H1; subst.
+    + (* other SeqBreak *)
+      assert (st' = st2 /\ SContinue = SBreak).
+      { apply IHceval1. apply H7. }
+      inversion H2. discriminate.
+    + (* other SeqContinue *) subst. 
+      apply IHceval2, H8.
+  - (* E_IfTrue *) inversion H1; subst.
+    + (* other E_IfTrue *) apply IHceval, H9.
+    + (* other E_IfFalse *) rewrite H8 in H. discriminate.
+  - (* E_IfFalse *) inversion H1; subst.
+    + (* other E_IfTrue *) rewrite H8 in H. discriminate.
+    + (* other E_IfFalse *) apply IHceval, H9.
+  - (* E_WhileFalse *) inversion H0; subst; try auto; try (rewrite H3 in H; discriminate).
+  - (* E_WhileTrue *) inversion H2; subst.
+    + (* other E_WhileFalse *) rewrite H8 in H. discriminate.
+    + (* other E_WhileTrue *) apply IHceval2.
+      assert (st' = st'0 /\ SContinue = SContinue).
+      { apply IHceval1. apply H6. }
+      inversion H3. rewrite H4. apply H10.
+    + (* other E_WhileBreak *)
+      assert (st' = st2 /\ SContinue = SBreak).
+      { apply IHceval1. apply H9. }
+      inversion H3. discriminate.
+  - (* E_WhileBreak *) inversion H1; subst.
+    + (* other E_WhileFalse *) rewrite H7 in H. discriminate.
+    + (* other E_WhileTrue *)
+      assert (st' = st'0 /\ SBreak = SContinue).
+      { apply IHceval. apply H5. }
+      inversion H2. discriminate.
+    + (* other E_WhileBreak *) 
+      assert (st' = st2 /\ SBreak = SBreak).
+      { apply IHceval. apply H8. }
+      inversion H2. auto.
+Qed.
 
 End BreakImp.
 
 (* Exercise add_for_loop *)
-(* left unfinished *)
 
-    
+Module ForImp.
+
+Inductive com : Type :=
+  | FSkip
+  | FAss (x: string) (a: aexp)
+  | FSeq (c1 c2: com)
+  | FIf (b: bexp) (c1 c2: com)
+  | FWhile (b: bexp) (c: com)
+  | FFor (c1: com) (b: bexp) (c2: com) (c3: com).
+
+Notation "'SKIP'" := FSkip.
+Notation "x '::=' a" := (FAss x a) (at level 60).
+Notation "c1 ;; c2" := (FSeq c1 c2) (at level 80, right associativity).
+Notation "'WHILE' b 'DO' c 'END'" := (FWhile b c) (at level 80, right associativity).
+Notation "'TEST' c1 'THEN' c2 'ELSE' c3 'FI'" := (FIf c1 c2 c3) (at level 80, right associativity).
+Notation "'FOR' '(' c1 ';' b ';' c2 ')' 'DO' c3 'END'" := (FFor c1 b c2 c3) (at level 80, right associativity).
+
+Reserved Notation "st '=[' c ']=>' st'" (at level 40, st' at next level).
+Inductive cval: state -> com -> state -> Prop :=
+  | F_Skip: forall st, st =[ FSkip ]=> st
+  | F_Ass: forall x a st, st =[ FAss x a ]=> (x !-> (aeval st a); st)
+  | F_Seq: forall c1 c2 st st' st'', st =[ c1 ]=> st' -> st' =[ c2 ]=> st'' -> st =[ c1;; c2 ]=> st''
+  | F_IfTrue: forall b c1 c2 st st', beval st b = true -> st =[ c1 ]=> st' -> st =[ TEST b THEN c1 ELSE c2 FI ]=> st'
+  | F_IfFalse: forall b c1 c2 st st', beval st b = false -> st =[ c2 ]=> st' -> st =[ TEST b THEN c1 ELSE c2 FI ]=> st'
+  | F_WhileFalse: forall b c st, beval st b = false -> st =[ WHILE b DO c END ]=> st
+  | F_WhileTrue: forall b c st st' st'', beval st b = true -> st =[ c ]=> st' -> st' =[ WHILE b DO c END ]=> st'' -> st =[ WHILE b DO c END ]=> st''
+  | F_For: forall b c1 c2 c3 st st', st =[ c1 ;; WHILE b DO c3 ;; c2 END ]=> st' -> st =[ FOR ( c1; b; c2 ) DO c3 END ]=> st' 
+where "st '=[' c ']=>' st'" := (cval st c st').
+
+Definition for_imp_prog : com := 
+  (Y ::= (ANum 0);;
+    FOR ( X ::= (ANum 1) ; BNot (BEq (AId X) (ANum 0)) ; X ::= AMinus (AId X) (ANum 1) )
+    DO Y ::= APlus (AId X) (AId Y) END).
+
+Example for_imp_ex: empty_st =[ for_imp_prog ]=> (X !-> 0; Y !-> 1; X !-> 1; Y !-> 0).
+Proof.
+  unfold for_imp_prog. 
+  apply F_Seq with (Y !-> 0).
+  constructor.
+  apply F_For.
+  apply F_Seq with (X !-> 1; Y !-> 0).
+  constructor.
+  apply F_WhileTrue with (X !-> 0; Y !-> 1; X !-> 1; Y !-> 0).
+  constructor.
+  apply F_Seq with (Y !-> 1; X !-> 1; Y !-> 0).
+  constructor.
+  constructor.
+  apply F_WhileFalse.
+  constructor.
+Qed.
