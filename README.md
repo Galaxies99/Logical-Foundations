@@ -13,7 +13,7 @@ Tony Fang (Galaxies) 's Study Record
 |  8   |     Maps      |    Finished     |
 |  9   | ProofObjects  |    Finished     |
 |  10  | IndPrinciples |    Finished     |
-|  11  |      Rel      |   Unfinished    |
+|  11  |      Rel      |    Finished     |
 |  12  |      Imp      |   Unfinished    |
 |  13  |   ImpParser   |   Unfinished    |
 |  14  |  ImpCEvalFun  |   Unfinished    |

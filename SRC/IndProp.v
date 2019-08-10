@@ -257,7 +257,7 @@ Inductive total_relation: nat -> nat -> Prop :=
   | re_n_S n m (H: total_relation n m): total_relation n (S m).
 
 (* Exercise empty_relation *)
-Inductive empty_relation: nat -> Prop := .
+Inductive empty_relation: nat -> nat -> Prop := .
 
 (* Exercise le_exercises *)
 Lemma le_trans: forall m n o, m <= n -> n <= o -> m <= o.
