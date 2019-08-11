@@ -1631,12 +1631,36 @@ Proof.
   unfold derives.
   unfold is_der.
   split.
-  - induction re.
+  - generalize dependent a.
+    generalize dependent s.
+    induction re.
     + intros. inversion H.
-    + intros. inversion H.
-    + intros. inversion H.
+    + intros. subst. inversion H.
+    + intros. subst. inversion H.
       simpl. rewrite <- Induction.eqb_refl. apply MEmpty.
     + intros. simpl.
+      apply app_ne in H.
+      destruct H as [[H1 H2] | [s0 [s1 [H1 [H2 H3]]]]].
+      * destruct (match_eps re1) eqn: Hmatch.
+        { apply MUnionL. apply IHre2. apply H2. }
+        { admit. }
+      * destruct (match_eps re1) eqn: Hmatch.
+        { admit. }
+        { admit. }
+    + intros. simpl. inversion H; subst.
+      * apply MUnionL. apply IHre1. apply H2.
+      * apply MUnionR. apply IHre2. apply H1.
+    + intros. simpl.
+      apply star_ne in H.
+      destruct H as [s1 [s2 [H1 [H2 H3]]]].
+      admit.
+  - intros.
+    generalize dependent s.
+    generalize dependent a.
+    induction re.
+    + intros. inversion H.
+    + intros. 
+
 Admitted.
 
 Definition matches_regex m: Prop :=
