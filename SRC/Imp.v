@@ -256,7 +256,7 @@ Inductive aevalR: aexp -> nat -> Prop :=
       aevalR (AMult e1 e2) (n1 * n2).
 End TooHardToRead.
 
-Notation "e 鈥榎\' n" := (aevalR e n)
+Notation "e ‘\\' n" := (aevalR e n)
   (at level 50, left associativity) : type_scope.
 
 End aevalR_first_try.
