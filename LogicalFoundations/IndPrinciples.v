@@ -1,6 +1,6 @@
 (* Chap 10 IndPrinciples *)
 Set Warnings "-notation-overridden,-parsing".
-From SRC Require Export ProofObjects.
+From LF Require Export ProofObjects.
 
 (* Chap 10.1 Basics *)
 Check nat_ind.

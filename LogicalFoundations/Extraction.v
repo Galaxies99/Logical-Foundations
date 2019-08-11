@@ -6,7 +6,7 @@ Extraction Language OCaml.
 From Coq Require Import Arith.Arith.
 From Coq Require Import Init.Nat.
 From Coq Require Import Arith.EqNat.
-From SRC Require Import ImpCEvalFun.
+From LF Require Import ImpCEvalFun.
 
 Extraction "test1.ml" ceval_step.
 
@@ -31,9 +31,9 @@ Require Import ExtrOcamlBasic.
 Require Import ExtrOcamlString.
 Extract Inductive sumbool => "bool" ["true" "false"].
 
-From SRC Require Import Imp.
-From SRC Require Import ImpParser.
-From SRC Require Import Maps.
+From LF Require Import Imp.
+From LF Require Import ImpParser.
+From LF Require Import Maps.
 Extraction "test.ml" empty_st ceval_step parse.
 
 (* Chap 15.4 Discussion *)

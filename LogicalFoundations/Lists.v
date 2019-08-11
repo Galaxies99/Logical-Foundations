@@ -1,6 +1,6 @@
 (* Chap 3 Lists *)
-From SRC Require Export Basics.
-From SRC Require Export Induction.
+From LF Require Export Basics.
+From LF Require Export Induction.
 Module NatList.
 
 (* Chap 3.1 Pairs of Numbers *)

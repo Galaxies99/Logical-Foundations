@@ -1,7 +1,7 @@
 (* Chap 9 ProofObjects *)
 (* The Curry-Howard Correspondence *)
 Set Warnings "-notation-overridden,-parsing".
-From SRC Require Export IndProp.
+From LF Require Export IndProp.
 
 Print even.
 

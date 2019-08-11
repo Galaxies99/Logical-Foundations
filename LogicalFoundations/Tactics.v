@@ -1,6 +1,6 @@
 (* Chap 5 Tactics *)
 Set Warnings "-notation-overridden,-parsing".
-From SRC Require Export Poly.
+From LF Require Export Poly.
 
 (* Chap 5.1 The apply Tactic *)
 Theorem silly1: forall (n m o p: nat),
@@ -445,7 +445,7 @@ Qed.
 
 (* Chap 5.9 Additional Exercises *)
 (* Exercise eqb_sym *)
-From SRC Require Export Induction.
+From LF Require Export Induction.
 
 Theorem eqb_sym: forall (n m: nat),
   (n =? m) = (m =? n).

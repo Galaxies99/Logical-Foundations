@@ -1,7 +1,7 @@
 (* Chap 11 Rel *)
 (* PROPERTIES OF RELATIONS *)
 Set Warnings "-notation-overridden,-parsing".
-From SRC Require Export IndProp.
+From LF Require Export IndProp.
 
 (* Chap 11.1 Relations *)
 Definition relation (X: Type) := X -> X -> Prop.

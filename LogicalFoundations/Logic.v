@@ -1,6 +1,6 @@
 (* Chap 6 Logic *)
 Set Warnings "-notation-overridden,-parsing".
-From SRC Require Export Tactics.
+From LF Require Export Tactics.
 
 Check 3 = 3.
 Check forall n m: nat, n + m = m + n.
@@ -704,7 +704,7 @@ Proof.
   - simpl. apply IHk'.
 Qed.
 
-From SRC Require Export Induction.
+From LF Require Export Induction.
 Theorem evenb_double_conv: forall n,
   exists k, n = if evenb n then double k
                 else S (double k).

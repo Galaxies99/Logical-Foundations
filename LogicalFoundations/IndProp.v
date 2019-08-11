@@ -1,6 +1,6 @@
 (* Chap 7 IndProp *)
 Set Warnings "-notation-overridden,-parsing".
-From SRC Require Export Logic.
+From LF Require Export Logic.
 Require Coq.omega.Omega.
 
 (* Chap 7.1 Inductively Defined Propositions *)

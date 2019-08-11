@@ -1,5 +1,5 @@
 (* Chap 2 Proof by Induction *)
-From SRC Require Export Basics.
+From LF Require Export Basics.
 
 (* Chap 2.1 Proof by Induction *)
 

@@ -1,8 +1,8 @@
 (* Chap 16 Auto *)
 Set Warnings "-notation-overridden,-parsing".
 From Coq Require Import omega.Omega.
-From SRC Require Import Maps.
-From SRC Require Import Imp.
+From LF Require Import Maps.
+From LF Require Import Imp.
 
 Ltac inv H := inversion H; subst; clear H.
 

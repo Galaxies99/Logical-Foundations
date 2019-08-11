@@ -2,7 +2,7 @@
 (* Chap 14.1 A Broken Evaluator *)
 From Coq Require Import omega.Omega.
 From Coq Require Import Arith.Arith.
-From SRC Require Import Imp Maps.
+From LF Require Import Imp Maps.
 
 Open Scope imp_scope.
 Fixpoint ceval_step1 (st: state) (c: com) : state :=

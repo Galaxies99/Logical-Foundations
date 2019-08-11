@@ -1,7 +1,7 @@
 (* Chap 4 Poly *)
 (* Suppress some annoying warnings from Coq: *)
 Set Warnings "-notation-overridden,-parsing".
-From SRC Require Export Lists.
+From LF Require Export Lists.
 
 (* Chap 4.1 Polymorphism *)
 (* Chap 4.1.1 Polymorphic Lists *)

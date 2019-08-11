@@ -9,7 +9,7 @@ From Coq Require Import omega.Omega.
 From Coq Require Import Lists.List.
 From Coq Require Import Strings.String.
 Import ListNotations.
-From SRC Require Import Maps.
+From LF Require Import Maps.
 
 (* Chap 12.1 Arithmetic and Boolean Expressions *)
 (* Chap 12.1.1 Syntax *)

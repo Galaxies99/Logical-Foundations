@@ -25,7 +25,7 @@ From Coq Require Import Init.Nat.
 From Coq Require Import Arith.EqNat.
 From Coq Require Import Lists.List.
 Import ListNotations.
-From SRC Require Import Maps Imp.
+From LF Require Import Maps Imp.
 
 (* ################################################################# *)
 (** * Internals *)
