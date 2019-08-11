@@ -18,6 +18,6 @@ Tony Fang (Galaxies) 's Study Record
 |  13  |   ImpParser   |   Finished *    |
 |  14  |  ImpCEvalFun  |    Finished     |
 |  15  |  Extraction   |    Finished     |
-|  16  |     Auto      |   Unfinished    |
+|  16  |     Auto      |    Finished     |
 
 * (*) optional, unread yet.
