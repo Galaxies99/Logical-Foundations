@@ -108,11 +108,9 @@ Proof.
   intros.
   apply not_le in H0.
   unfold gt in *.
-  Search (_ < _ -> _ <= _ -> _ < _).
   apply lt_le_trans with j.
   apply H.
   apply le_trans with (k - 3).
-  Search (_ < _ -> _ <= _).
   apply lt_le_weak.
   auto.
   apply le_minus.
@@ -123,6 +121,7 @@ Theorem omega_example2:
 Proof.
   intros. omega.
 Qed.
+
 Definition maybe_swap (al: list nat) : list nat :=
   match al with
   | a :: b :: ar => if (a >? b) then b :: a :: ar else a :: b :: ar
@@ -143,10 +142,11 @@ Check (1 >? 2).
 Locate ">?".
 Print Nat.ltb.
 
+(*
 Locate ">=?".
 Locate leb.
 Print Nat.leb.
-
+*)
 
 Theorem maybe_swap_idempotent:
   forall al, maybe_swap (maybe_swap al) = maybe_swap al.
@@ -181,14 +181,15 @@ Proof.
 Qed.
 
 (* Chap 2 Permutations *)
+
+(*
 Locate Permutation.
 Check Permutation.
 Print Permutation.
+*)
 
 (* Exercise Permutation_properties *)
 (* Skipped *)
-
-Search Permutation.
 
 Example butterfly: forall b u t e r f l y: nat,
   Permutation ([b; u; t; t; e; r] ++ [f; l; y]) ([f; l; u; t; t; e; r] ++ [b; y]).
@@ -208,7 +209,6 @@ Proof.
   eapply perm_trans.
   2: apply Permutation_app_comm.
   rewrite <- app_assoc.
-  Search (Permutation (_ ++ _) (_ ++ _)).
   apply Permutation_app_head.
   eapply perm_trans.
   2: apply Permutation_app_comm.
@@ -216,7 +216,6 @@ Proof.
   Check perm_skip.
   apply perm_skip.
   apply perm_skip.
-  Search (Permutation (_ :: _) (_ :: _)).
   apply perm_swap.
 Qed.
 
@@ -284,11 +283,9 @@ Proof.
 Qed.
 
 End Exploration1.
+
 (* Chap 3 Summary: Comparisons and Permutations *)
 (* Exercise Forall_perm *)
-Print Forall.
-Search Forall.
-
 Theorem Forall_per: forall {A} (f: A -> Prop) al bl,
   Permutation al bl -> Forall f al -> Forall f bl.
 Proof.
