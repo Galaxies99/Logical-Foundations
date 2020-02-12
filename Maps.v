@@ -53,7 +53,7 @@ Definition total_map (A: Type) := string -> A.
 
 Definition t_empty {A: Type} (v: A): total_map A :=
   (fun _ => v).
-
+  
 Definition t_update {A: Type} (m: total_map A) (x: string) (v: A) :=
   fun x' => if eqb_string x x' then v else m x'.
 
